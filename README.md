@@ -1,4 +1,5 @@
-![<img src="https://raw.githubusercontent.com/Sarossilli/Musical-Joycons/master/readme/header.gif" alt="HEADER">](HEADER.GIF) 
+[<img src="https://raw.githubusercontent.com/Sarossilli/Musical-Joycons/master/readme/header.gif" alt="HEADER">]() 
+
 ### Play Music with your Joycon Controller
 
 ## Project Overview:
@@ -7,11 +8,20 @@
 - Built a MIDI interpreter to interface between music files and joycon vibration output
 
 ## How to Use:
-- This is specifically made for linux. I will add a windows version later
-- Clone the repository 
-> git clone https://github.com/sarossilli/Musical-Joycons.git
+This is specifically made for linux. I will add a windows version later
+1. Clone the repository 
+In a terminal window: 
+`git clone https://github.com/sarossilli/Musical-Joycons.git`
 
+2. use the makefile to complile:
+use command `make` in terminal
 
+3. Connect your joycons through bluetooth
+
+4. Run the program:
+use command `sudo ./a.out`
+
+If there is a segmentation error, make sure that your joycons are connected to your computer through bluetooth
 ## Code and Resources Used 
 **Language Used:** C++
 
