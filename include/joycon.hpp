@@ -96,7 +96,7 @@ public:
 		//	printf("%d bytes written.\n", res);
 		//}
 
-		//// set non-blocking:
+		//// set non-blocking:./
 		//hid_set_nonblocking(handle, 1);
 
 		res = hid_read(handle, buf, 0x40);
@@ -135,7 +135,7 @@ public:
 		unsigned char buf[0x40];
 		memset(buf, 0, 0x40);
 
-		uint8_t rumble_base[9] = { (++global_count) & 0xF, 0x00, 0x01, 0x40, 0x40, 0x00, 0x01, 0x40, 0x40 };
+		int rumble_base[9] = { (++global_count) & 0xF, 0x00, 0x01, 0x40, 0x40, 0x00, 0x01, 0x40, 0x40 };
 		memcpy(buf, rumble_base, 9);
 
 		if (global_count > 0xF) {
