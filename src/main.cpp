@@ -4,9 +4,16 @@
 #include <joycon.hpp>
 #include <unistd.h>
 
-#pragma warning(disable:4996)
-using namespace std;
+#include "MidiFile.h"
+#include "Binasc.h"
+#include <fstream>
+#include <string>
 
+
+#pragma warning(disable:4996)
+
+using namespace std;
+using namespace smf;
 
 #define JOYCON_VENDOR 0x057e
 #define JOYCON_L_BT 0x2006
@@ -19,6 +26,7 @@ using namespace std;
 
 inline int mk_odd(int);
 void nsleep(useconds_t);
+void play(Joycon);
 
 std::vector<Joycon> joycons;
 
@@ -26,16 +34,11 @@ unsigned char buf[65];
 int res = 0;
 
 int main(){
-    int read;	// number of bytes read
-	int written;// number of bytes written
-	const char *device_name;
 
 	// Enumerate and print the HID devices on the system
 	struct hid_device_info *devs, *cur_dev;
 
 	res = hid_init();
-
-init_start:
 
 	devs = hid_enumerate(JOYCON_VENDOR, 0x0);
 	cur_dev = devs;
@@ -105,9 +108,19 @@ init_start:
 			joycons[i].rumble(100, 3);
 		}
 	}
+	nsleep(1000);
+	play(joycons[0]);
+	printf("Done.\n");
+}
 
+void nsleep(useconds_t n){
+	usleep(n*1000);
+}
+inline int mk_odd(int n) {
+	return n - (n % 2 ? 0 : 1);
+}
 
-	// notes arbitrarily defined:
+// notes arbitrarily defined:
 	#define C3 110
 	#define D3 120
 	#define E3 130
@@ -128,283 +141,28 @@ init_start:
 	#define B5 240
 	#define C5 250
 
-
-
-	if (true) {
-		for (int i = 0; i < 1; ++i) {
-
-			printf("Playing mario theme...\n");
-
-			float spd = 1;
-			float spd2 = 1;
-
-			//goto N1;
-
-			Joycon joycon = joycons[0];
-
-			nsleep(1000);
-
-			joycon.rumble(mk_odd(E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// E2
-			nsleep(100 / spd2);
-			joycon.rumble(mk_odd(E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// E2
-			nsleep(100 / spd2);
-			joycon.rumble(mk_odd(E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// E2
-			nsleep(100 / spd2);
-			joycon.rumble(mk_odd(C4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// E2
-			nsleep(100 / spd2);
-			joycon.rumble(mk_odd(G4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// G2
-			nsleep(400 / spd2);
-
-			joycon.rumble(mk_odd(A4), 1); nsleep(400 / spd); joycon.rumble(1, 3);	// too low for joycon
-			nsleep(50 / spd2);
-
-			joycon.rumble(mk_odd(C4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C2
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(G3), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// G1
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(E3), 2); nsleep(200 / spd); joycon.rumble(1, 3);	// E1
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(A4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// A2
-
-			nsleep(100 / spd2);
-			joycon.rumble(mk_odd(B4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// B2
-
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(A4B4), 1); nsleep(200 / spd); joycon.rumble(1, 3);// A2-B2?
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(A4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// A2
-			nsleep(100 / spd2);
-			joycon.rumble(mk_odd(G3), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// G1
-
-
-			nsleep(100 / spd2);
-			joycon.rumble(mk_odd(E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// E2
-			nsleep(100 / spd2);
-			joycon.rumble(mk_odd(G4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// G2
-			nsleep(100 / spd2);
-			joycon.rumble(mk_odd(A5), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// A3
-
-
-
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(F4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// F2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(G4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// G2
-
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// E2
-
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(C4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(D4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// D2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(B4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// B2
-
-
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(C4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C2
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(G3), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// G1
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(E3), 2); nsleep(200 / spd); joycon.rumble(1, 3);	// E1
-
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(A4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// A2
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(B4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// B2
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(A4B4), 1); nsleep(200 / spd); joycon.rumble(1, 3);// A2-B2?
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(A4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// A2
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(G4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// G2
-
-
-			nsleep(100 / spd2);
-			joycon.rumble(mk_odd(E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// E2
-			nsleep(100 / spd2);
-			joycon.rumble(mk_odd(G4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// G2
-			nsleep(100 / spd2);
-			joycon.rumble(mk_odd(A5), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// A3
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(F4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// F2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(G4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// G2
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// E2
-
-
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(C4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(D4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// D2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(B4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// B2
-
-																					// new:
-
-			nsleep(500 / spd2);
-
-			joycon.rumble(mk_odd(G4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// G2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(F4G4), 1); nsleep(200 / spd); joycon.rumble(1, 3);// F2-G2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(F4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// F2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(D4E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);// D2-E2
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// E2
-
-			nsleep(200 / spd2);
-
-			joycon.rumble(mk_odd(G3A4), 1); nsleep(200 / spd); joycon.rumble(1, 3);// G1-A2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(A4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// A2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(C4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C2
-
-
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(A4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// A2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(C4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(D4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// D2
-
-
-			nsleep(300 / spd2);
-
-			joycon.rumble(mk_odd(G4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// G2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(F4G4), 1); nsleep(200 / spd); joycon.rumble(1, 3);// F2-G2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(F4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// F2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(D4E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);// D2-E2
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// E2
-
-
-																					// three notes:
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(C5), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C3
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(C3), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C3
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(C3), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C3
-
-
-		N1:
-
-
-			nsleep(500 / spd2);
-			joycon.rumble(mk_odd(G4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// G2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(F4G4), 1); nsleep(200 / spd); joycon.rumble(1, 3);// F2G2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(F4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// F2
-
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(D4E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);// D2E2
-
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// E2
-
-
-
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(G3A4), 1); nsleep(200 / spd); joycon.rumble(1, 3);// G1A2
-
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(A4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// A2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(C4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C2
-			nsleep(100 / spd2);
-			joycon.rumble(mk_odd(A4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// A2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(C4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(D4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// D2
-
-
-			nsleep(300 / spd2);
-			joycon.rumble(mk_odd(D4E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);// D2E2
-			nsleep(300 / spd2);
-			joycon.rumble(mk_odd(D4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// D2
-			nsleep(300 / spd2);
-			joycon.rumble(mk_odd(C4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C2
-
-
-			nsleep(800 / spd2);
-
-
-			joycon.rumble(mk_odd(G4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// G2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(F4G4), 1); nsleep(200 / spd); joycon.rumble(1, 3);// F2G2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(F4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// F2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(D4E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);// D2E2
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// E2
-
-			nsleep(200 / spd2);
-
-
-			joycon.rumble(mk_odd(G3A4), 1); nsleep(200 / spd); joycon.rumble(1, 3);// G1A2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(A4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// A2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(C4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C2
-
-			nsleep(200 / spd2);
-
-			joycon.rumble(mk_odd(A4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// A2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(C4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(D4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// D2
-
-			nsleep(300 / spd2);
-
-
-			joycon.rumble(mk_odd(G4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// G2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(F4G4), 1); nsleep(200 / spd); joycon.rumble(1, 3);// F2G2
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(F4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// F2
-
-
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(D4E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);// D2E2
-			nsleep(100 / spd2);
-			joycon.rumble(mk_odd(E4), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// E2
-
-																					// 30 second mark
-
-																					// three notes:
-
-			nsleep(300 / spd2);
-			joycon.rumble(mk_odd(C5), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C3
-			nsleep(200 / spd2);
-			joycon.rumble(mk_odd(C5), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C3
-			nsleep(50 / spd2);
-			joycon.rumble(mk_odd(C5), 1); nsleep(200 / spd); joycon.rumble(1, 3);	// C3
-
-
-			nsleep(1000);
-		}
+void play(Joycon joycon){
+	MidiFile midifile;
+	midifile.read("/home/sarossilli/Dev/Musical-Joycons/hcb.mid");
+	if (!midifile.status()) {
+		cerr << "Error reading MIDI file " << endl;
+		exit(1);
 	}
-
-	printf("Done.\n");
+	midifile.doTimeAnalysis();
+	midifile.linkNotePairs();
+	int track = 1;
+	int note;
+	for (int i=0; i<midifile[track].size(); i++) {
+		note = midifile[track][i].getKeyNumber();
+		if (!midifile[track][i].isNoteOn()) {
+			continue;
+		}
+		note = 20+((note/2)*10);
+		cout<<note<<endl;
+		joycon.rumble(mk_odd(note), 1);
+		nsleep(midifile[track][i].getDurationInSeconds()*1000);
+		joycon.rumble(1, 3);
+   }
 }
 
-void nsleep(useconds_t n){
-	usleep(n*1000);
-}
-inline int mk_odd(int n) {
-	return n - (n % 2 ? 0 : 1);
-}
+   
