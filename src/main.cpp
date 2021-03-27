@@ -95,16 +95,26 @@ int main(int argc, char **argv)
 		joycons[i].init_bt();
 	}
 
-	// Create Threads
-	// Badly done concurency but it works well enough
-	vector<std::thread> threads;
-	threads.push_back(thread(playOnJC, ref(joycons[0]), track, ref(filename)));
-	threads.push_back(thread(playOnJC, ref(joycons[1]), track2, ref(filename)));
-
-	for (auto &thread : threads)
+	if (joycons.size() == 2)
 	{
-		thread.join();
+		// Create Threads
+		// Badly done concurency but it works well enough
+		vector<std::thread> threads;
+		threads.push_back(thread(playOnJC, ref(joycons[0]), track, ref(filename)));
+
+		threads.push_back(thread(playOnJC, ref(joycons[1]), track2, ref(filename)));
+
+		for (auto &thread : threads)
+		{
+			thread.join();
+		}
 	}
-	
-	printf("Done.\n");
+	else if (joycons.size() == 1)
+	{
+		playOnJC(joycons[0], track, filename);
+	}
+	else{
+		cerr << "Joycons not found. Try Re-pairing the joycons" << endl;
+	}
+	return 0;
 }

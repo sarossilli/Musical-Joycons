@@ -3,25 +3,27 @@
 ### Play Music with your Joycon Controller
 
 ## Project Overview:
-- Created a program that allows nintendo switch joycons to play music through vibrations
+- Created a program that allows nintendo switch joycons to play a midifile through vibrations
 - Utilized HID API hidraw library to interface with joycons
-- Built a MIDI interpreter to interface between music files and joycon vibration output
+- Built a Song class to interface between music files and joycon vibration output
 
 ## How to Use:
-This is specifically made for linux. I will add a windows version later
+This is specifically made for linux. I will add a windows version later (hopefully)
 1. Clone the repository 
-In a terminal window: 
 `git clone https://github.com/sarossilli/Musical-Joycons.git`
 
-2. use the makefile to complile:
+2. Compile the HIDAPI for your system and add lib files to libs folder
+
+Instructions here: `https://github.com/libusb/hidapi`
+
+3. use the makefile to Compile:
 use command `make` in terminal
 
-3. Connect your joycons through bluetooth
+4. Connect your Joycons through bluetooth
 
-4. Run the program:
-use command `sudo ./a.out`
+5. Run the program:
+use command `./bin/build (midifile).mid track1 track2`
 
-If there is a segmentation error, make sure that your joycons are connected to your computer through bluetooth
 ## Code and Resources Used 
 **Language Used:** C++
 
@@ -29,7 +31,7 @@ If there is a segmentation error, make sure that your joycons are connected to y
 
 HIDAPI, using the Linux/hidraw backend. Github Repo Avaliable [Here](https://github.com/signal11/hidapi)
 
-**Resources:**
+**Resources Used:**
 
 Nintendo Switch Reverse Engineering. Github Repo Avaliable [Here](https://github.com/dekuNukem/Nintendo_Switch_Reverse_Engineering/)
 
