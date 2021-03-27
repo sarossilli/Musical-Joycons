@@ -45,7 +45,7 @@ void playOnJC(Joycon jc, int track, string name)
 
 int main(int argc, char **argv)
 {
-	if (argc < 3)
+	if (argc < 4)
 	{
 		cerr << "Incorrect syntax" << endl
 			 << "musicalJC (midiFile.mid) (trackNumber1) (trackNumber2)" << endl;
@@ -113,7 +113,8 @@ int main(int argc, char **argv)
 	{
 		playOnJC(joycons[0], track, filename);
 	}
-	else{
+	else
+	{
 		cerr << "Joycons not found. Try Re-pairing the joycons" << endl;
 	}
 	return 0;
