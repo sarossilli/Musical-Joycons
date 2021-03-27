@@ -25,7 +25,7 @@ private:
 public:
     Song(string);
     int print(int);
-    int play(Joycon, int);
+    void play(Joycon, int);
     int mk_odd(int);
     int *getRange(int);
 };
@@ -45,8 +45,6 @@ int Song::print(int t)
             cout << event << "\t" << key << "\t" << time << "\t" << duration << endl;
         }
     }
-
-    return 0;
 }
 
 int *Song::getRange(int track)
@@ -74,7 +72,7 @@ int *Song::getRange(int track)
     return minmax;
 }
 
-int Song::play(Joycon jc, int track)
+void Song::play(Joycon jc, int track)
 {
 
     double note;
@@ -82,7 +80,7 @@ int Song::play(Joycon jc, int track)
 
     //Fit MIDI NOTES Between 130-255
     int *ptr;
-    int minRumble = 125;
+    int minRumble = 130;
     int maxRumble = 255;
 
     ptr = getRange(track);
@@ -119,7 +117,7 @@ int Song::play(Joycon jc, int track)
             jc.rumble(100, 3);
         }
     }
-    return 0;
+
 }
 
 Song::Song(string fileName)

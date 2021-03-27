@@ -4,7 +4,7 @@
 #include <joycon.hpp>
 #include <unistd.h>
 #include <song.hpp>
-
+#include <thread>
 
 #pragma warning(disable:4996)
 
@@ -25,11 +25,17 @@ using namespace std;
 inline int mk_odd(int);
 void nsleep(useconds_t);
 void play(Joycon,string,int);
-
+void playOnJC(Joycon jc, int track, string name);
 
 std::vector<Joycon> joycons;
 
 int res = 0;
+
+void playOnJC(Joycon jc, int track, string name){
+	Song song(name);
+	song.play(jc,track);
+}
+   
 
 int main(int argc, char** argv){
 
@@ -84,9 +90,15 @@ int main(int argc, char** argv){
 		}
 	}
 	nsleep(1000);
-	
-	Song midiTest(filename);
-	midiTest.play(joycons[0],track);
+	//thread(playOnJC,ref(joycons[0]),1,ref(filename));
+	//thread t2(playOnJC,ref(joycons[1]),2,ref(filename));
+	vector<std::thread> threads;
+	threads.push_back(thread(playOnJC,ref(joycons[0]),1,ref(filename)));
+	threads.push_back(thread(playOnJC,ref(joycons[1]),3,ref(filename)));
+
+    for(auto& thread : threads){
+        thread.join();
+    }
 	printf("Done.\n");
 
 }
@@ -95,6 +107,3 @@ void nsleep(useconds_t n){
 	usleep(n*1000);
 }
 
-
-
-   
