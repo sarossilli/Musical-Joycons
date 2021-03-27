@@ -3,17 +3,13 @@
 #include <hidapi.h>
 #include <joycon.hpp>
 #include <unistd.h>
-
-#include "MidiFile.h"
-#include "Binasc.h"
-#include <fstream>
-#include <string>
+#include <song.hpp>
 
 
 #pragma warning(disable:4996)
 
 using namespace std;
-using namespace smf;
+
 
 #define JOYCON_VENDOR 0x057e
 #define JOYCON_L_BT 0x2006
@@ -24,16 +20,21 @@ using namespace smf;
 #define PI 3.14159265359
 #define L_OR_R(lr) (lr == 1 ? 'L' : (lr == 2 ? 'R' : '?'))
 
+
+//Helper Functions
 inline int mk_odd(int);
 void nsleep(useconds_t);
 void play(Joycon,string,int);
 
+
 std::vector<Joycon> joycons;
 
-unsigned char buf[65];
 int res = 0;
 
 int main(int argc, char** argv){
+
+	string filename = argv[1];
+	int track = atoi(argv[2]);
 
 	// Enumerate and print the HID devices on the system
 	struct hid_device_info *devs, *cur_dev;
@@ -73,28 +74,6 @@ int main(int argc, char** argv){
 		joycons[i].init_bt();
     }
 
-	// set lights:
-	printf("setting LEDs...\n");
-	for (int r = 0; r < 5; ++r) {
-		for (int i = 0; i < joycons.size(); ++i) {
-			Joycon *jc = &joycons[i];
-			// Player LED Enable
-			memset(buf, 0x00, 0x40);
-			if (i == 0) {
-				buf[0] = 0x0 | 0x0 | 0x0 | 0x1;		// solid 1
-			}
-			if (i == 1) {
-				if (/*settings.combineJoyCons*/true) {
-					buf[0] = 0x0 | 0x0 | 0x0 | 0x1; // solid 1
-				} else if (/*!settings.combineJoyCons*/false) {
-					buf[0] = 0x0 | 0x0 | 0x2 | 0x0; // solid 2
-				}
-			}
-			jc->send_subcommand(0x01, 0x30, buf, 1);
-		}
-	}
-
-
 	// give a small rumble to all joycons:
 	printf("vibrating JoyCon(s).\n");
 	for (int k = 0; k < 1; ++k) {
@@ -105,7 +84,9 @@ int main(int argc, char** argv){
 		}
 	}
 	nsleep(1000);
-	play(joycons[0],argv[1],atoi(argv[2]));
+	
+	Song midiTest(filename);
+	midiTest.play(joycons[0],track);
 	printf("Done.\n");
 
 }
@@ -113,37 +94,7 @@ int main(int argc, char** argv){
 void nsleep(useconds_t n){
 	usleep(n*1000);
 }
-inline int mk_odd(int n) {
-	return n - (n % 2 ? 0 : 1);
-}
 
-void play(Joycon joycon,string fileName, int track){
-	MidiFile midifile;
-	int note;
 
-	midifile.read(fileName);
-	if (!midifile.status()) {
-		cerr << "Error reading MIDI file " << endl;
-		exit(1);
-
-	}
-	midifile.doTimeAnalysis();
-	midifile.linkNotePairs();
-
-	cout << "PYLAYING TRACK: " << track << endl;
-	for (int i=0; i<midifile[track].size(); i++) {
-		if (!midifile[track][i].isNoteOn()) {
-			continue;
-		}
-		note = (5.7* midifile[track][i].getKeyNumber()) - 164.40; //Temporary frequency estimation
-		if(note >230){ note -=80;}
-		joycon.rumble(mk_odd(note), 1);
-
-		nsleep(midifile[track][i].getDurationInSeconds()*1000);
-
-		joycon.rumble(1, 3);
-
-   }
-}
 
    
