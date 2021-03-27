@@ -1,3 +1,17 @@
+/* 
+ * @file song.hpp
+ *
+ * @brief Song header
+ * Represents a playable midi file 
+ * construct using Song(filename)
+ * use play(joycon, track) to play song on a joycon 
+ *	
+ * 
+ * @author Sam Rossilli
+ * Contact: sarossili@gmail.com
+ *
+ */
+
 #include "MidiFile.h"
 #include "Binasc.h"
 #include <fstream>
@@ -18,9 +32,6 @@ private:
     int parts;
     MidiEventList t1;
     MidiEventList t2;
-    void nsleep(double);
-    int tpq;
-    int qps = 1;
 
 public:
     Song(string);
@@ -45,10 +56,14 @@ int Song::print(int t)
             cout << event << "\t" << key << "\t" << time << "\t" << duration << endl;
         }
     }
+    return 0;
 }
 
+// Gets max/min notes for a track
+// Used to fit track within bounds of joycon rumble
 int *Song::getRange(int track)
 {
+
     static int minmax[2];
     MidiEventList tr = file[track];
 
@@ -75,49 +90,55 @@ int *Song::getRange(int track)
 void Song::play(Joycon jc, int track)
 {
 
+    if (track > file.getTrackCount())
+    {
+        cerr << "Requested track does not exist. Check that you put the correct midi track number" << endl;
+        return;
+    }
+
+    cout << "Playing tack " << track << endl;
+
     double note;
     double curTime = 0;
 
-    //Fit MIDI NOTES Between 130-255
+    //Fit MIDI NOTES Between 135-255 rumble frequency
     int *ptr;
-    int minRumble = 130;
+    int minRumble = 135;
     int maxRumble = 255;
-
     ptr = getRange(track);
-
     double diff = (maxRumble - minRumble) / (72 - 48);
-    int shift =  (ptr[0]+ ((ptr[1] - ptr[0]) / 2)) - ((72 - 48)/2); 
-    cout << "MID" << shift << endl;
-    double a = 440.0; // a is 440 hz...
+    int shift = (ptr[0] + ((ptr[1] - ptr[0]) / 2)) - ((72 - 48) / 2);
 
+    // move through each event
     for (int i = 0; i < file[track].size(); i++)
     {
+        //Calculate note/sleeptime
         if (file[track][i].isNote())
         {
             double time = file[track][i].seconds;
             int diff = ((time - curTime) * 1000);
-            std::this_thread::sleep_for(std::chrono::milliseconds(diff));
+            this_thread::sleep_for(chrono::milliseconds(diff));
             curTime = time;
         }
 
+        //play noteOn
         if (file[track][i].isNoteOn())
         {
-            int note = (file[track][i].getKeyNumber()) + shift; //Temporary frequency estimation
+            int note = (file[track][i].getKeyNumber()) + shift; // calculate midi note to joycon rumble value
             note = diff * (note - 48) + minRumble;
-            if (note > maxRumble | note < minRumble)
+            if (note > maxRumble | note < minRumble) //Handle overflow of rumble value
             {
                 note = (note % maxRumble) + minRumble;
             }
-
-            cout << note << endl;
             jc.rumble(mk_odd(note), 1);
         }
+        //Turn note off
         if (file[track][i].isNoteOff())
         {
             jc.rumble(100, 3);
         }
     }
-
+    return;
 }
 
 Song::Song(string fileName)
@@ -131,20 +152,14 @@ Song::Song(string fileName)
     }
     if (file.getTrackCount() < 2)
     {
-        cerr << "Not enough Tracks" << endl;
-        exit(1);
+        cerr << "Not enough Tracks for two joycons" << endl;
     }
 
     file.linkNotePairs();
     file.doTimeAnalysis();
 }
 
-void Song::nsleep(double n)
-{
-
-    usleep(n * 1000);
-}
-
+// Notes have to be odd for some reason
 inline int Song::mk_odd(int n)
 {
     return n - (n % 2 ? 0 : 1);
