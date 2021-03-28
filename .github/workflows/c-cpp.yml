@@ -26,6 +26,5 @@ jobs:
         cp libhidapi.so cd ${{ github.workspace }}/libs/libhidapi.so
 
     - name: BuildProj
-      uses: actions/checkout@v2
       run:
         make build
