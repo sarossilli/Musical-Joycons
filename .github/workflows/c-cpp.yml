@@ -2,16 +2,32 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - name: make build
-      run: make build
+    - name: Checkout tools repo
+      uses: actions/checkout@v2
+      with:
+       repository: signal11/hidapi
+
+      run:
+        cd ..
+        git clone https://github.com/signal11/hidapi
+        cd hidapi
+        ./bootstrap
+        ./configure
+        make
+        sudo make install 
+        cp hidapi.a cd ${{ github.workspace }}/libs/hidapi.a
+        cp hidapi.o cd ${{ github.workspace }}/libs/hidapi.o
+        cp hidapi.so cd ${{ github.workspace }}/libs/hidapi.so
+        cp libhidapi.a cd ${{ github.workspace }}/libs/libhidapi.a
+        cp libhidapi.so cd ${{ github.workspace }}/libs/libhidapi.so
+    - name: BuildProj
+      run:
+        make build
