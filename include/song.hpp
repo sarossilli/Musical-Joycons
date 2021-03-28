@@ -32,6 +32,10 @@ private:
     int parts;
     MidiEventList t1;
     MidiEventList t2;
+    double diff;
+    double shift;
+    int minRumble = 120;
+    int maxRumble = 250;
 
 public:
     Song(string);
@@ -101,14 +105,6 @@ void Song::play(Joycon jc, int track)
     double note;
     double curTime = 0;
 
-    //Fit MIDI NOTES Between 135-255 rumble frequency
-    int *ptr;
-    int minRumble = 135;
-    int maxRumble = 255;
-    ptr = getRange(track);
-    double diff = (maxRumble - minRumble) / (72 - 48);
-    int shift = (ptr[0] + ((ptr[1] - ptr[0]) / 2)) - ((72 - 48) / 2);
-
     // move through each event
     for (int i = 0; i < file[track].size(); i++)
     {
@@ -125,7 +121,7 @@ void Song::play(Joycon jc, int track)
         if (file[track][i].isNoteOn())
         {
             int note = (file[track][i].getKeyNumber()) + shift; // calculate midi note to joycon rumble value
-            note = diff * (note - 48) + minRumble;
+            note = diff * (note - 60) + minRumble;
             if (note > maxRumble | note < minRumble) //Handle overflow of rumble value
             {
                 note = (note % maxRumble) + minRumble;
@@ -143,6 +139,9 @@ void Song::play(Joycon jc, int track)
 
 Song::Song(string fileName)
 {
+
+
+
     file.read(fileName);
 
     if (!file.status())
@@ -155,6 +154,23 @@ Song::Song(string fileName)
         cerr << "Not enough Tracks for two joycons" << endl;
     }
 
+    double min;
+    double max;
+    int *ptr;
+    for (int i = 0; i < file.getTrackCount(); i++)
+    {
+        ptr = getRange(i);
+        if (ptr[0] < min)
+        {
+            min = ptr[0];
+        }
+        if (ptr[1] > max)
+        {
+            max = ptr[1];
+        }
+    }
+    diff = (maxRumble - minRumble) / (84 - 60);
+    shift = (ptr[0] + ((ptr[1] - ptr[0]) / 2)) - ((84 - 60) / 2);
     file.linkNotePairs();
     file.doTimeAnalysis();
 }
