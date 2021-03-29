@@ -169,12 +169,8 @@ Song::Song(string fileName)
             max = ptr[1];
         }
     }
-    diff = 5;
-
-    //NEED TO IMPLEMENT BETTER NOTE TO RUMBLE
-    //diff = (maxRumble - minRumble) / (84 - 60);
-    //shift = (ptr[0] + ((ptr[1] - ptr[0]) / 2)) - ((84 - 60) / 2);
-
+    diff = (maxRumble - minRumble) / (84 - 60);
+    shift = (ptr[0] + ((ptr[1] - ptr[0]) / 2)) - ((84 - 60) / 2);
     file.linkNotePairs();
     file.doTimeAnalysis();
 }
