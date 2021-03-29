@@ -2,8 +2,6 @@
  * @file main.cc
  *
  * @brief Entry for musical-joycons program
- * Program Syntax: 
- *     ./build (filename) (leftJoycon Track) (rightJoycon Track)
  *	
  * Main enumerates HID device and finds the joycon devices on bluetooth. 
  * 
@@ -19,6 +17,8 @@
 //#include <unistd.h>
 #include <song.hpp>
 #include <thread>
+#include <iostream>
+#include <string>
 
 #pragma warning(disable : 4996)
 
@@ -30,7 +30,6 @@ using namespace std;
 #define PRO_CONTROLLER 0x2009
 #define JOYCON_CHARGING_GRIP 0x200e
 #define SERIAL_LEN 18
-#define PI 3.14159265359
 #define L_OR_R(lr) (lr == 1 ? 'L' : (lr == 2 ? 'R' : '?'))
 
 void playOnJC(Joycon jc, int track, string name);
@@ -45,16 +44,18 @@ void playOnJC(Joycon jc, int track, string name)
 
 int main(int argc, char **argv)
 {
-	if (argc < 4)
-	{
-		cerr << "Incorrect syntax" << endl
-			 << "musicalJC (midiFile.mid) (trackNumber1) (trackNumber2)" << endl;
-		exit(1);
-	}
 
-	string filename = argv[1];
-	int track = atoi(argv[2]);
-	int track2 = atoi(argv[3]);
+	cout << "Enter Midi" << endl;
+	string filename;
+	int track;
+	int track2;
+	getline(cin, filename);
+	cout << "Enter Track Number" << endl;
+	cin >> track;
+	cout << "Enter Track Two" << endl;
+	cin >> track2;
+
+
 
 	// Enumerate HID devices on the system
 	struct hid_device_info *devs, *cur_dev;
@@ -101,7 +102,6 @@ int main(int argc, char **argv)
 		// Badly done concurency but it works well enough
 		vector<std::thread> threads;
 		threads.push_back(thread(playOnJC, ref(joycons[0]), track, ref(filename)));
-
 		threads.push_back(thread(playOnJC, ref(joycons[1]), track2, ref(filename)));
 
 		for (auto &thread : threads)
