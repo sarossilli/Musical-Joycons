@@ -16,7 +16,7 @@
 #include "Binasc.h"
 #include <fstream>
 #include <string>
-#include <unistd.h>
+//#include <unistd.h>
 #include <math.h> /* pow */
 
 #include <thread>
