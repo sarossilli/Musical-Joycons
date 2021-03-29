@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Dev\Musical-Joycons\Debug\Musical-Joycons.exe</FullPath>
+      <FullPath>C:\Dev\Musical-Joycons\bin\Debug\Musical-Joycons.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />
