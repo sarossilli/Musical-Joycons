@@ -17,7 +17,6 @@
 //#include <unistd.h>
 #include <song.hpp>
 #include <thread>
-#include <iostream>
 #include <string>
 
 #pragma warning(disable : 4996)
@@ -50,12 +49,13 @@ int main(int argc, char **argv)
 	int track;
 	int track2;
 	getline(cin, filename);
-	cout << "Enter Track Number" << endl;
+	cout << "Enter Track Number to play on Right Joycon" << endl;
 	cin >> track;
-	cout << "Enter Track Two" << endl;
+	cout << "Enter Track Number to play on Left Joycon" << endl;
 	cin >> track2;
 
-
+	track--;
+	track2--;
 
 	// Enumerate HID devices on the system
 	struct hid_device_info *devs, *cur_dev;
