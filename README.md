@@ -38,7 +38,7 @@ use command `./bin/build (midifile).mid track1 track2`
 **Libraries:** 
 
 HIDAPI, using the Linux/hidraw backend. Github Repo Avaliable [Here](https://github.com/signal11/hidapi)
-
+MIDI file parsing library Github Repo Avaliable [Here] https://github.com/craigsapp/midifile
 **Resources Used:**
 
 Nintendo Switch Reverse Engineering. Github Repo Avaliable [Here](https://github.com/dekuNukem/Nintendo_Switch_Reverse_Engineering/)
