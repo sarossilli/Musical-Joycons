@@ -17,7 +17,6 @@
 //#include <unistd.h>
 #include <song.hpp>
 #include <thread>
-#include <iostream>
 #include <string>
 
 #pragma warning(disable : 4996)
@@ -33,6 +32,7 @@ using namespace std;
 #define L_OR_R(lr) (lr == 1 ? 'L' : (lr == 2 ? 'R' : '?'))
 
 void playOnJC(Joycon jc, int track, string name);
+inline bool exists_test(const std::string& name);
 
 std::vector<Joycon> joycons;
 
@@ -44,16 +44,6 @@ void playOnJC(Joycon jc, int track, string name)
 
 int main(int argc, char **argv)
 {
-
-	cout << "Enter Midi" << endl;
-	string filename;
-	int track;
-	int track2;
-	getline(cin, filename);
-	cout << "Enter Track Number" << endl;
-	cin >> track;
-	cout << "Enter Track Two" << endl;
-	cin >> track2;
 
 
 
@@ -90,32 +80,89 @@ int main(int argc, char **argv)
 	}
 	hid_free_enumeration(devs);
 
+	if(joycons.empty()){
+		cout << "Warning: Joycons not found. Make sure they are paired" << endl;
+		cin.get();
+		exit(1);
+	}
 	// init joycons:
 	for (int i = 0; i < joycons.size(); ++i)
 	{
 		joycons[i].init_bt();
 	}
 
+
+	string filename;
+	int track;
+	int track2;
+
+	cout << "Enter Midi : " << endl;
+
+	getline(cin, filename);
+	while (!exists_test(filename)) {
+		cout << "Midi Not Found" << endl;
+		cout << "Enter Midi : " << endl;
+		getline(cin, filename);
+	}
+
+
+
+	Song song(filename);
+	int len = song.getTrackCount();
+	cout << "This Midi File Has " << len << " Tracks" << endl;
+
+
+	string input;
+	cout << "Enter Track Number to play on Right Joycon" << endl;
+
+	getline(cin, input);
+	track = stoi(input);
+	cout << track;
+	while (track > len | track < 1) {
+		cout << "Track Out of Range" << endl;
+		cout << "Enter Track Number to play on Right Joycon" << endl;
+		getline(cin, input);
+		track = stoi(input);
+	}
+	cout << "Enter Track Number to play on Right Joycon" << endl;
+
+	getline(cin, input);
+	track2 = stoi(input);
+
+	while (track2 > len | track2<1) {
+		cout << "Track Out of Range" << endl;
+		cout << "Enter Track Number to play on Right Joycon" << endl;
+		getline(cin, input);
+		track2 = stoi(input);
+	}
+
+	track--;
+	track2--;
+
+
 	if (joycons.size() == 2)
 	{
+
 		// Create Threads
 		// Badly done concurency but it works well enough
 		vector<std::thread> threads;
 		threads.push_back(thread(playOnJC, ref(joycons[0]), track, ref(filename)));
 		threads.push_back(thread(playOnJC, ref(joycons[1]), track2, ref(filename)));
 
+		
 		for (auto &thread : threads)
 		{
 			thread.join();
 		}
 	}
-	else if (joycons.size() == 1)
-	{
+	else{
 		playOnJC(joycons[0], track, filename);
 	}
-	else
-	{
-		cerr << "Joycons not found. Try Re-pairing the joycons" << endl;
-	}
 	return 0;
+}
+
+
+inline bool exists_test(const std::string& name) {
+	ifstream f(name.c_str());
+	return f.good();
 }

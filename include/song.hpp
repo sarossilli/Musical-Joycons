@@ -43,8 +43,11 @@ public:
     void play(Joycon, int);
     int mk_odd(int);
     int *getRange(int);
+    int getTrackCount();
 };
-
+int Song::getTrackCount() {
+    return file.getTrackCount();
+}
 int Song::print(int t)
 {
     int track = t;
@@ -104,7 +107,6 @@ void Song::play(Joycon jc, int track)
 
     double note;
     double curTime = 0;
-
     // move through each event
     for (int i = 0; i < file[track].size(); i++)
     {
@@ -112,8 +114,8 @@ void Song::play(Joycon jc, int track)
         if (file[track][i].isNote())
         {
             double time = file[track][i].seconds;
-            int diff = ((time - curTime) * 1000);
-            this_thread::sleep_for(chrono::milliseconds(diff));
+            int timeDiff = ((time - curTime) * 1000);
+            this_thread::sleep_for(chrono::milliseconds(timeDiff));
             curTime = time;
         }
 
@@ -122,15 +124,19 @@ void Song::play(Joycon jc, int track)
         {
             int note = (file[track][i].getKeyNumber()) + shift; // calculate midi note to joycon rumble value
             note = diff * (note - 60) + minRumble;
+
             if (note > maxRumble | note < minRumble) //Handle overflow of rumble value
             {
                 note = (note % maxRumble) + minRumble;
             }
+
+
             jc.rumble(mk_odd(note), 1);
         }
         //Turn note off
         if (file[track][i].isNoteOff())
         {
+
             jc.rumble(100, 3);
         }
     }
@@ -139,9 +145,6 @@ void Song::play(Joycon jc, int track)
 
 Song::Song(string fileName)
 {
-
-
-
     file.read(fileName);
 
     if (!file.status())
@@ -154,6 +157,7 @@ Song::Song(string fileName)
         cerr << "Not enough Tracks for two joycons" << endl;
     }
 
+    /* 
     double min;
     double max;
     int *ptr;
@@ -171,6 +175,9 @@ Song::Song(string fileName)
     }
     diff = (maxRumble - minRumble) / (84 - 60);
     shift = (ptr[0] + ((ptr[1] - ptr[0]) / 2)) - ((84 - 60) / 2);
+
+    */
+    diff = 5;
     file.linkNotePairs();
     file.doTimeAnalysis();
 }

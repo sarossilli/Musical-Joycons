@@ -11,8 +11,8 @@
 1. Download the release
 2. Extract exe and dll into the same folder
 3. Pair Joycons
-4. run musical-joycons.exe
-5. Put Midi File into the same directory as the exe
+4. Put Midi File into the same directory as the exe
+5. run musical-joycons.exe
 6. Input midiFile name, track1 and track2 when prompted
 
 ## How to Develop:
