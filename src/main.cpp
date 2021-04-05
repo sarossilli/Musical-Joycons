@@ -60,20 +60,9 @@ int main(int argc, char **argv)
 		// identify by vendor:
 		if (cur_dev->vendor_id == JOYCON_VENDOR)
 		{
-
-			// bluetooth, left / right joycon:
-			if (cur_dev->product_id == JOYCON_L_BT || cur_dev->product_id == JOYCON_R_BT)
-			{
-				Joycon jc = Joycon(cur_dev);
-				joycons.push_back(jc);
-			}
-
-			// pro controller:
-			if (cur_dev->product_id == PRO_CONTROLLER)
-			{
-				Joycon jc = Joycon(cur_dev);
-				joycons.push_back(jc);
-			}
+			Joycon jc = Joycon(cur_dev);
+			joycons.push_back(jc);
+		
 		}
 
 		cur_dev = cur_dev->next;
