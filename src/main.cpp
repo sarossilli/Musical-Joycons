@@ -19,6 +19,8 @@
 #include <thread>
 #include <string>
 
+
+
 #pragma warning(disable : 4996)
 
 using namespace std;
@@ -38,8 +40,11 @@ std::vector<Joycon> joycons;
 
 void playOnJC(Joycon jc, int track, string name)
 {
-	Song song(name);
-	song.play(jc, track);
+	MidiFile file;
+	file.read(name);
+	file.linkNotePairs();
+	file.doTimeAnalysis();
+	jc.play(file, track);
 }
 
 int main(int argc, char **argv)

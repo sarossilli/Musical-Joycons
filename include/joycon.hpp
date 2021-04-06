@@ -2,8 +2,13 @@
 #include <hidapi.h>
 #include <string.h>
 #include <math.h>
+#include "MidiFile.h"
+
+#include <thread>
+#include <chrono>
 
 using namespace std;
+using namespace smf;
 #define JOYCON_VENDOR 0x057e
 #define JOYCON_L_BT 0x2006
 #define JOYCON_R_BT 0x2007
@@ -14,6 +19,12 @@ using namespace std;
 class Joycon {
 
 public:
+	// Tuning
+	int minRumble = 120;
+	int maxRumble = 250;
+	double diff = 5;
+
+
 
 	hid_device *handle;
 	wchar_t *serial;
@@ -159,6 +170,54 @@ public:
 		if (data) {
 			memcpy(data, buf, 0x40); //TODO
 		}
+	}
+
+	void play(MidiFile file, int track) {
+		vector<int> notestack;
+		if (track > file.getTrackCount())
+		{
+			cerr << "Requested track does not exist. Check that you put the correct midi track number" << endl;
+			return;
+		}
+
+		cout << "Playing tack " << track << endl;
+
+		double note;
+		double curTime = 0;
+		// move through each event
+		for (int i = 0; i < file[track].size(); i++)
+		{
+			//Calculate note/sleeptime
+			if (file[track][i].isNote())
+			{
+				double time = file[track][i].seconds;
+				int timeDiff = ((time - curTime) * 1000);
+				this_thread::sleep_for(chrono::milliseconds(timeDiff));
+				curTime = time;
+			}
+
+			//play noteOn
+			if (file[track][i].isNoteOn())
+			{
+				int note = (file[track][i].getKeyNumber()); // calculate midi note to joycon rumble value
+				note = diff * (note - 60) + minRumble;
+
+				if (note > maxRumble | note < minRumble) //Handle overflow of rumble value
+				{
+					note = (note % maxRumble) + minRumble;
+				}
+
+
+				rumble(mk_odd(note), 1);
+			}
+			//Turn note off
+			if (file[track][i].isNoteOff())
+			{
+
+				rumble(100, 3);
+			}
+		}
+		return;
 	}
 
 	void rumble(int frequency, int intensity) {
@@ -402,4 +461,12 @@ public:
 		return 0;
 
 	}
+
+	// Notes have to be odd for some reason
+	inline int mk_odd(int n)
+	{
+		return n - (n % 2 ? 0 : 1);
+	}
 };
+
+
