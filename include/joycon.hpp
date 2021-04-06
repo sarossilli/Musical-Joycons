@@ -3,7 +3,8 @@
 #include <string.h>
 #include <math.h>
 #include "MidiFile.h"
-
+#include <vector>
+#include <algorithm>
 #include <thread>
 #include <chrono>
 
@@ -173,32 +174,48 @@ public:
 	}
 
 	void play(MidiFile file, int track) {
-		vector<int> notestack;
+		vector<MidiEvent> notestack;
+
+		file.doTimeAnalysis();
+		file.linkEventPairs();
+		file.linkNotePairs();
+		file.doTimeAnalysis();
 		if (track > file.getTrackCount())
 		{
 			cerr << "Requested track does not exist. Check that you put the correct midi track number" << endl;
 			return;
 		}
 
+
 		cout << "Playing tack " << track << endl;
 
 		double note;
 		double curTime = 0;
+		bool isPlaying = false;
+		std::vector<MidiEvent>::iterator k;
 		// move through each event
-		for (int i = 0; i < file[track].size(); i++)
+		for (int i = 0; i < file[track].size()-1; i++)
 		{
 			//Calculate note/sleeptime
 			if (file[track][i].isNote())
 			{
 				double time = file[track][i].seconds;
-				int timeDiff = ((time - curTime) * 1000);
-				this_thread::sleep_for(chrono::milliseconds(timeDiff));
-				curTime = time;
+				double timeDiff = ((time - curTime) * 1000);
+				this_thread::sleep_for(chrono::milliseconds((int)timeDiff));
+				curTime = time + timeDiff;
 			}
 
 			//play noteOn
 			if (file[track][i].isNoteOn())
 			{
+				notestack.push_back(file[track][i]);
+		
+
+				if (notestack.size() >= 1) {
+					cout << notestack.size();
+					std::sort(notestack.begin(), notestack.end(), less_than_key());
+				}
+
 				int note = (file[track][i].getKeyNumber()); // calculate midi note to joycon rumble value
 				note = diff * (note - 60) + minRumble;
 
@@ -206,17 +223,41 @@ public:
 				{
 					note = (note % maxRumble) + minRumble;
 				}
-
-
 				rumble(mk_odd(note), 1);
+
 			}
 			//Turn note off
 			if (file[track][i].isNoteOff())
 			{
+				notestack.pop_back();
+				if (notestack.size() > 0) {
+					
+					int note = notestack[0].getKeyNumber(); // calculate midi note to joycon rumble value
+					note = diff * (note - 60) + minRumble;
 
-				rumble(100, 3);
+					if (note > maxRumble | note < minRumble) //Handle overflow of rumble value
+					{
+						note = (note % maxRumble) + minRumble;
+					}
+					rumble(mk_odd(note), 1);
+					
+		
+				}
+				else {
+				
+					rumble(100, 3);
+				}
 			}
+
+			;
+			double time = (file[track][i + 1].seconds);
+			double timeDiff = ((time - curTime) * 1000);
+			this_thread::sleep_for(chrono::milliseconds((int)timeDiff));
+			curTime = time;
+
 		}
+
+		rumble(100, 1);
 		return;
 	}
 
@@ -467,6 +508,14 @@ public:
 	{
 		return n - (n % 2 ? 0 : 1);
 	}
+
+	struct less_than_key
+	{
+		inline bool operator() (const MidiEvent& struct1, const MidiEvent& struct2)
+		{
+			return (struct1.seconds + struct1.getDurationInSeconds() > struct2.seconds + struct2.getDurationInSeconds());
+		}
+	};
 };
 
 

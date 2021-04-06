@@ -15,7 +15,6 @@
 #include <hidapi.h>
 #include <joycon.hpp>
 //#include <unistd.h>
-#include <song.hpp>
 #include <thread>
 #include <string>
 
@@ -33,18 +32,14 @@ using namespace std;
 #define SERIAL_LEN 18
 #define L_OR_R(lr) (lr == 1 ? 'L' : (lr == 2 ? 'R' : '?'))
 
-void playOnJC(Joycon jc, int track, string name);
+void playOnJC(Joycon jc, int track, MidiFile name);
 inline bool exists_test(const std::string& name);
 
 std::vector<Joycon> joycons;
 
-void playOnJC(Joycon jc, int track, string name)
+void playOnJC(Joycon jc, int track, MidiFile name)
 {
-	MidiFile file;
-	file.read(name);
-	file.linkNotePairs();
-	file.doTimeAnalysis();
-	jc.play(file, track);
+	jc.play(name, track);
 }
 
 int main(int argc, char **argv)
@@ -98,11 +93,13 @@ int main(int argc, char **argv)
 		cout << "Enter Midi : " << endl;
 		getline(cin, filename);
 	}
+	MidiFile file;
+	file.read(filename);
+	file.linkNotePairs();
+	file.doTimeAnalysis();
 
 
-
-	Song song(filename);
-	int len = song.getTrackCount();
+	int len = file.getTrackCount();
 	cout << "This Midi File Has " << len << " Tracks" << endl;
 
 
@@ -140,8 +137,8 @@ int main(int argc, char **argv)
 		// Create Threads
 		// Badly done concurency but it works well enough
 		vector<std::thread> threads;
-		threads.push_back(thread(playOnJC, ref(joycons[0]), track, ref(filename)));
-		threads.push_back(thread(playOnJC, ref(joycons[1]), track2, ref(filename)));
+		threads.push_back(thread(playOnJC, ref(joycons[0]), track, ref(file)));
+		threads.push_back(thread(playOnJC, ref(joycons[1]), track2, ref(file)));
 
 		
 		for (auto &thread : threads)
