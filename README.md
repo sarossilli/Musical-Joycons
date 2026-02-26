@@ -1,5 +1,7 @@
 [<img src="https://raw.githubusercontent.com/Sarossilli/Musical-Joycons/master/readme/header.gif" alt="HEADER">]() 
 
+# Moved to [New Repo](https://github.com/sarossilli/MusicalJoycons)
+
 ### Play Music with your Joycon Controller
 
 ## Project Overview:
